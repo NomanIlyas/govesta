@@ -1,2 +1,0 @@
-# govesta
-Real state project 
