@@ -1,0 +1,71 @@
+<?php
+
+use Illuminate\Database\Seeder;
+use MenaraSolutions\Geographer\Earth;
+
+class CountryTableSeeder extends Seeder
+{
+    public function run()
+    {
+        $earth = new Earth();
+        $countries = $earth->getCountries();
+
+        $countryId = 1;
+        $stateId = 1;
+        $cityId = 1;
+
+        $countryDb = [];
+        $stateDb = [];
+        $cityDb = [];
+
+        foreach ($countries as $countryItem) {
+
+            // Country
+            $country = array(
+                'id' => $countryId,
+                'code' => $countryItem['code'],
+                'code3' => $countryItem['code3'],
+                'name' => $countryItem['name'],
+                'slug' => str_slug($countryItem['name']),
+                'currency' => $countryItem['currency'],
+                'phone_prefix' => intval($countryItem['phonePrefix']),
+            );
+            $countryDb[] = $country;
+
+            // States
+            $states = $countryItem->getStates();
+
+            foreach ($states as $stateItem) {
+                // State
+                $state = array(
+                    'id' => $stateId,
+                    'name' => $stateItem['name'],
+                    'slug' => str_slug($stateItem['name']),
+                    'country_id' => $countryId,
+                );
+                $stateDb[] = $state;
+
+                foreach ($stateItem->getCities() as $cityItem) {
+                    //City
+                    $city = array(
+                        'id' => $cityId,
+                        'name' => $cityItem['name'],
+                        'slug' => str_slug($cityItem['name']),
+                        'latitude' => $cityItem['latitude'],
+                        'longitude' => $cityItem['longitude'],
+                        'state_id' => $stateId,
+                        'country_id' => $countryId,
+                    );
+                    $cityDb[] = $city;
+                    $cityId++;
+                }
+                $stateId++;
+            }
+            $countryId++;
+        };
+        
+        DB::table('countries')->insert($countryDb);
+        DB::table('states')->insert($stateDb);
+        DB::table('cities')->insert($cityDb);
+    }
+}

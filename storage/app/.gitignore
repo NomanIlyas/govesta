@@ -1,0 +1,4 @@
+files/
+!public/
+uploads/
+!.gitignore 
